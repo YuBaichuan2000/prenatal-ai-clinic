@@ -1,7 +1,7 @@
 // frontend/src/components/Layout/MainLayout.jsx
 import React from 'react'
 import { Baby, Plus, MessageCircle, Clock, Heart, Trash2 } from 'lucide-react'
-import { useChatContext } from '../../hooks/useChat'
+import { useChatContext } from '../../contexts/ChatContext'
 
 const MainLayout = ({ children }) => {
   const {
@@ -14,9 +14,10 @@ const MainLayout = ({ children }) => {
   } = useChatContext();
 
   const handleConversationClick = (conversationId) => {
-    if (conversationId !== currentConversationId) {
-      loadConversation(conversationId);
-    }
+    console.log('Clicking conversation:', conversationId, 'Current:', currentConversationId);
+    console.log('Available conversations:', conversations);
+    // Always load the conversation, even if it's the same ID (for refresh purposes)
+    loadConversation(conversationId);
   };
 
   const handleDeleteConversation = async (e, conversationId) => {

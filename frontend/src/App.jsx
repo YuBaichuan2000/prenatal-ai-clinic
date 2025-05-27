@@ -3,11 +3,14 @@ import React, { useState, useEffect } from 'react'
 import { MessageCircle, Heart, Baby, Sparkles, Shield, Clock, Wifi, WifiOff } from 'lucide-react'
 import MainLayout from './components/Layout/MainLayout'
 import ChatContainer from './components/Chat/ChatContainer'
+import { ChatContextProvider, useChatContext } from './contexts/ChatContext'
 import { checkApiConnection } from './services/api'
 
-function App() {
-  const [showChat, setShowChat] = useState(false)
+// Inner component that uses the chat context
+function AppContent() {
   const [isApiConnected, setIsApiConnected] = useState(null)
+  const { conversations, loadConversation, isLoading } = useChatContext()
+  const [hasCheckedInitialLoad, setHasCheckedInitialLoad] = useState(false)
 
   // Check API connection on mount
   useEffect(() => {
@@ -23,11 +26,41 @@ function App() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleStartChat = () => {
-    setShowChat(true)
+  // Auto-load most recent conversation when conversations are loaded
+  useEffect(() => {
+    if (!hasCheckedInitialLoad && conversations.length > 0 && !isLoading) {
+      console.log('Auto-loading most recent conversation:', conversations[0])
+      // Sort by updated_at to get the most recent, then load it
+      const sortedConversations = [...conversations].sort((a, b) => 
+        new Date(b.updated_at) - new Date(a.updated_at)
+      )
+      const mostRecent = sortedConversations[0]
+      if (mostRecent) {
+        loadConversation(mostRecent.conversation_id)
+      }
+      setHasCheckedInitialLoad(true)
+    } else if (!hasCheckedInitialLoad && conversations.length === 0 && !isLoading) {
+      // No conversations exist, mark as checked so we show welcome screen
+      setHasCheckedInitialLoad(true)
+    }
+  }, [conversations, loadConversation, isLoading, hasCheckedInitialLoad])
+
+  // Show loading while we're checking for conversations or loading the initial conversation
+  if (!hasCheckedInitialLoad || (conversations.length > 0 && isLoading)) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-full animate-pulse"></div>
+            <span className="text-gray-600">Loading your conversations...</span>
+          </div>
+        </div>
+      </MainLayout>
+    )
   }
 
-  if (showChat) {
+  // If we have conversations, show the chat interface
+  if (conversations.length > 0) {
     return (
       <MainLayout>
         <ChatContainer />
@@ -35,6 +68,7 @@ function App() {
     )
   }
 
+  // No conversations - show welcome screen
   return (
     <MainLayout>
       {/* Professional Medical Welcome Area */}
@@ -124,15 +158,7 @@ function App() {
             
             {/* Call to Action */}
             <div className="space-y-4">
-              <button 
-                onClick={handleStartChat}
-                disabled={!isApiConnected}
-                className="btn-primary w-full md:w-auto px-8 py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Sparkles className="h-5 w-5" />
-                <span>Start Your First Conversation</span>
-              </button>
-              
+              {/* The "Start Your First Conversation" button now starts a new conversation directly */}
               <div className="text-sm text-gray-500">
                 {isApiConnected 
                   ? "Free to use • No registration required • HIPAA-compliant conversations"
@@ -161,6 +187,14 @@ function App() {
         </div>
       </div>
     </MainLayout>
+  )
+}
+
+function App() {
+  return (
+    <ChatContextProvider>
+      <AppContent />
+    </ChatContextProvider>
   )
 }
 

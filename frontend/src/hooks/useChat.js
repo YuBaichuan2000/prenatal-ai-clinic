@@ -36,6 +36,7 @@ export const useChat = (userId = 'default-user') => {
     try {
       setError(null);
       const conversationList = await chatApi.getConversations(userId);
+      console.log('Loaded conversations:', conversationList);
       setConversations(conversationList);
       setIsConnected(true);
     } catch (err) {
@@ -48,31 +49,69 @@ export const useChat = (userId = 'default-user') => {
   // Load messages for a specific conversation
   const loadConversation = useCallback(async (conversationId) => {
     try {
+      console.log('Loading conversation:', conversationId);
       setIsLoading(true);
       setError(null);
       
-      const { messages: conversationMessages } = await chatApi.getConversationMessages(conversationId);
+      // First verify the conversation exists in our list
+      const conversation = conversations.find(c => c.conversation_id === conversationId);
+      console.log('Found conversation:', conversation);
+      
+      if (!conversation) {
+        console.warn('Conversation not found in local list, but attempting to load anyway');
+      }
+      
+      const result = await chatApi.getConversationMessages(conversationId);
+      console.log('API result:', result);
+      
+      const { messages: conversationMessages } = result;
+      console.log('Loaded messages:', conversationMessages);
+      
+      // Check if conversationMessages is an array
+      if (!Array.isArray(conversationMessages)) {
+        console.error('Messages is not an array:', conversationMessages);
+        throw new Error('Invalid messages format received from server');
+      }
       
       // Transform backend messages to frontend format
-      const formattedMessages = conversationMessages.map(msg => ({
-        id: msg.message_id,
-        type: msg.type,
-        content: msg.content,
-        timestamp: new Date(msg.timestamp),
-        metadata: msg.metadata
-      }));
+      const formattedMessages = conversationMessages.map((msg, index) => {
+        console.log(`Formatting message ${index}:`, msg);
+        return {
+          id: msg.message_id || `msg-${index}`,
+          type: msg.type,
+          content: msg.content,
+          timestamp: new Date(msg.timestamp),
+          status: 'received',
+          metadata: msg.metadata
+        };
+      });
       
-      setMessages(formattedMessages);
+      console.log('Formatted messages:', formattedMessages);
+      console.log('Setting messages state with:', formattedMessages);
+      
+      // Use functional update to ensure state change
+      setMessages(prevMessages => {
+        console.log('Previous messages:', prevMessages);
+        console.log('New messages:', formattedMessages);
+        return formattedMessages;
+      });
+      
       setCurrentConversationId(conversationId);
       setIsConnected(true);
+      
+      // Force a small delay to ensure state has updated
+      setTimeout(() => {
+        console.log('State should be updated now');
+      }, 100);
+      
     } catch (err) {
       console.error('Failed to load conversation:', err);
-      setError('Failed to load conversation messages');
+      setError(`Failed to load conversation: ${err.message}`);
       setIsConnected(false);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [conversations]);
 
   // Send a message
   const sendMessage = useCallback(async (messageContent) => {
@@ -233,16 +272,5 @@ export const useChat = (userId = 'default-user') => {
     
     // Utils
     scrollToBottom
-  };
-};
-
-// Hook for managing application-wide chat state
-export const useChatContext = () => {
-  const [globalUserId] = useState('default-user'); // TODO: Replace with real auth
-  const chat = useChat(globalUserId);
-  
-  return {
-    ...chat,
-    userId: globalUserId
   };
 };
