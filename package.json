@@ -1,0 +1,22 @@
+{
+    "name": "prenatal-ai-clinic",
+    "version": "1.0.0",
+    "description": "Prenatal AI Clinic - Full Stack Application",
+    "scripts": {
+      "install-all": "cd frontend && npm install && cd ../backend && npm install",
+      "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+      "backend": "cd backend && npm run dev",
+      "frontend": "cd frontend && npm start",
+      "build": "cd frontend && npm run build"
+    },
+    "devDependencies": {
+      "concurrently": "^7.6.0"
+    },
+    "keywords": [
+      "prenatal",
+      "ai",
+      "chatbot",
+      "react",
+      "express"
+    ]
+  }
