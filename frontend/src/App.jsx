@@ -1,14 +1,66 @@
 // frontend/src/App.jsx
-import React from 'react'
-import { MessageCircle, Heart, Baby, Sparkles, Shield, Clock } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { MessageCircle, Heart, Baby, Sparkles, Shield, Clock, Wifi, WifiOff } from 'lucide-react'
 import MainLayout from './components/Layout/MainLayout'
+import ChatContainer from './components/Chat/ChatContainer'
+import { checkApiConnection } from './services/api'
 
 function App() {
+  const [showChat, setShowChat] = useState(false)
+  const [isApiConnected, setIsApiConnected] = useState(null)
+
+  // Check API connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      const connected = await checkApiConnection()
+      setIsApiConnected(connected)
+    }
+    
+    checkConnection()
+    
+    // Check connection periodically
+    const interval = setInterval(checkConnection, 30000) // Every 30 seconds
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleStartChat = () => {
+    setShowChat(true)
+  }
+
+  if (showChat) {
+    return (
+      <MainLayout>
+        <ChatContainer />
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       {/* Professional Medical Welcome Area */}
       <div className="flex-1 flex flex-col justify-center items-center p-8">
         <div className="max-w-2xl w-full">
+          {/* API Connection Status */}
+          {isApiConnected !== null && (
+            <div className={`mb-4 p-3 rounded-xl flex items-center space-x-2 ${
+              isApiConnected 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {isApiConnected ? (
+                <>
+                  <Wifi className="h-4 w-4" />
+                  <span className="text-sm font-medium">Connected to AI Assistant</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-4 w-4" />
+                  <span className="text-sm font-medium">Connection issues - Please check if backend is running</span>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Main Welcome Card */}
           <div className="medical-card text-center mb-8">
             {/* Header with Icon */}
@@ -72,13 +124,20 @@ function App() {
             
             {/* Call to Action */}
             <div className="space-y-4">
-              <button className="btn-primary w-full md:w-auto px-8 py-3 text-base">
+              <button 
+                onClick={handleStartChat}
+                disabled={!isApiConnected}
+                className="btn-primary w-full md:w-auto px-8 py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Sparkles className="h-5 w-5" />
                 <span>Start Your First Conversation</span>
               </button>
               
               <div className="text-sm text-gray-500">
-                Free to use • No registration required • HIPAA-compliant conversations
+                {isApiConnected 
+                  ? "Free to use • No registration required • HIPAA-compliant conversations"
+                  : "Please ensure backend services are running to start chatting"
+                }
               </div>
             </div>
           </div>
