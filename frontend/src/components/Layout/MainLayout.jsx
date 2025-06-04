@@ -1,7 +1,6 @@
-// frontend/src/components/Layout/MainLayout.jsx
-import React from 'react'
-import { Baby, Plus, MessageCircle, Clock, Heart, Trash2 } from 'lucide-react'
-import { useChatContext } from '../../contexts/ChatContext'
+"use client"
+import { Baby, Plus, MessageCircle, Clock, Heart, Trash2 } from "lucide-react"
+import { useChatContext } from "../../contexts/ChatContext"
 
 const MainLayout = ({ children }) => {
   const {
@@ -10,33 +9,33 @@ const MainLayout = ({ children }) => {
     loadConversation,
     startNewConversation,
     deleteConversation,
-    isLoading
-  } = useChatContext();
+    isLoading,
+  } = useChatContext()
 
   const handleConversationClick = (conversationId) => {
-    console.log('Clicking conversation:', conversationId, 'Current:', currentConversationId);
-    console.log('Available conversations:', conversations);
+    console.log("Clicking conversation:", conversationId, "Current:", currentConversationId)
+    console.log("Available conversations:", conversations)
     // Always load the conversation, even if it's the same ID (for refresh purposes)
-    loadConversation(conversationId);
-  };
+    loadConversation(conversationId)
+  }
 
   const handleDeleteConversation = async (e, conversationId) => {
-    e.stopPropagation(); // Prevent triggering conversation click
-    if (window.confirm('Are you sure you want to delete this conversation?')) {
-      await deleteConversation(conversationId);
+    e.stopPropagation() // Prevent triggering conversation click
+    if (window.confirm("Are you sure you want to delete this conversation?")) {
+      await deleteConversation(conversationId)
     }
-  };
+  }
 
   const formatTimeAgo = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInHours < 48) return 'Yesterday';
-    return date.toLocaleDateString();
-  };
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
+
+    if (diffInHours < 1) return "Just now"
+    if (diffInHours < 24) return `${diffInHours}h ago`
+    if (diffInHours < 48) return "Yesterday"
+    return date.toLocaleDateString()
+  }
 
   return (
     <div className="h-screen flex">
@@ -49,8 +48,7 @@ const MainLayout = ({ children }) => {
               <Baby className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">Prenatal AI Clinic</h1>
-              <p className="text-xs text-gray-500 font-medium">Your pregnancy companion</p>
+              <h1 className="text-2xl font-bold text-gray-900 clinic-heading">Prenatal AI Clinic</h1>
             </div>
           </div>
           <div className="flex items-center space-x-2 text-xs text-gray-500">
@@ -58,19 +56,15 @@ const MainLayout = ({ children }) => {
             <span>AI Assistant Available</span>
           </div>
         </div>
-        
+
         {/* New Chat Section */}
         <div className="p-4">
-          <button 
-            className="btn-primary w-full"
-            onClick={startNewConversation}
-            disabled={isLoading}
-          >
+          <button className="btn-primary w-full" onClick={startNewConversation} disabled={isLoading}>
             <Plus className="h-4 w-4" />
             <span>New Conversation</span>
           </button>
         </div>
-        
+
         {/* Navigation & Features */}
         <div className="px-4 pb-4">
           <div className="space-y-1">
@@ -88,14 +82,12 @@ const MainLayout = ({ children }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Chat History */}
         <div className="flex-1 px-4 pb-4 overflow-y-auto">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Recent Conversations ({conversations.length})
-            </h3>
-            
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Recent Conversations ({conversations.length})</h3>
+
             {isLoading ? (
               // Loading skeleton
               <div className="space-y-2">
@@ -122,20 +114,19 @@ const MainLayout = ({ children }) => {
                     onClick={() => handleConversationClick(conversation.conversation_id)}
                     className={`group p-3 rounded-xl cursor-pointer transition-all duration-200 border relative ${
                       currentConversationId === conversation.conversation_id
-                        ? 'bg-blue-50 border-blue-200 shadow-sm'
-                        : 'hover:bg-gray-50 border-transparent hover:border-gray-200'
+                        ? "bg-blue-50 border-blue-200 shadow-sm"
+                        : "hover:bg-gray-50 border-transparent hover:border-gray-200"
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-800 mb-1 truncate">
-                          {conversation.title || 'Untitled Conversation'}
+                          {conversation.title || "Untitled Conversation"}
                         </div>
                         <div className="text-xs text-gray-500 mb-1 line-clamp-2">
                           {conversation.last_message_preview && conversation.last_message_preview.length > 0
                             ? conversation.last_message_preview
-                            : 'No messages yet'
-                          }
+                            : "No messages yet"}
                         </div>
                         <div className="flex items-center text-xs text-gray-400">
                           <Clock className="h-3 w-3 mr-1" />
@@ -148,7 +139,7 @@ const MainLayout = ({ children }) => {
                           )}
                         </div>
                       </div>
-                      
+
                       {/* Delete button */}
                       <button
                         onClick={(e) => handleDeleteConversation(e, conversation.conversation_id)}
@@ -164,20 +155,18 @@ const MainLayout = ({ children }) => {
             )}
           </div>
         </div>
-        
+
         {/* Medical Disclaimer Footer */}
         <div className="p-4 border-t border-gray-200 gradient-sidebar">
-          <div className="text-xs text-gray-500 text-center leading-relaxed">
-            <div className="font-medium text-gray-600 mb-1">Medical Disclaimer</div>
+          <div className="text-xs text-gray-500 text-center leading-relaxed medical-text">
+            <div className="font-medium text-gray-600 mb-1 medical-heading">Medical Disclaimer</div>
             Always consult your healthcare provider for medical advice and decisions.
           </div>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col gradient-medical">
-        {children}
-      </div>
+      <div className="flex-1 flex flex-col gradient-medical">{children}</div>
     </div>
   )
 }
