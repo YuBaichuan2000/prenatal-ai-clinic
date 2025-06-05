@@ -1,7 +1,8 @@
 // frontend/src/components/Chat/ChatContainer.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { useChatContext } from '../../contexts/ChatContext';
+import ChatInput from './ChatInput';
 
 const ChatContainer = () => {
   const {
@@ -18,23 +19,6 @@ const ChatContainer = () => {
     scrollToBottomImmediate,
     scrollToMessage
   } = useChatContext();
-
-  const [inputMessage, setInputMessage] = useState('');
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || isTyping) return;
-
-    await sendMessage(inputMessage);
-    setInputMessage('');
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage(e);
-    }
-  };
 
   const handleQuickMessage = async (message) => {
     await sendMessage(message);
@@ -166,41 +150,11 @@ const ChatContainer = () => {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 p-6">
-        <form onSubmit={handleSendMessage} className="flex space-x-4">
-          <div className="flex-1">
-            <textarea
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me about pregnancy, nutrition, exercises, or any prenatal questions..."
-              className="input-primary resize-none"
-              rows={1}
-              style={{
-                minHeight: '50px',
-                maxHeight: '120px',
-                resize: 'none'
-              }}
-              disabled={isTyping}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={!inputMessage.trim() || isTyping}
-            className="btn-primary px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isTyping ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </button>
-        </form>
-        
-        <div className="mt-3 text-xs text-gray-500 text-center">
-          Always consult your healthcare provider for medical advice • Press Enter to send
-        </div>
-      </div>
+      <ChatInput
+        onSendMessage={handleQuickMessage}
+        isLoading={isTyping}
+        placeholder="Ask me about pregnancy, nutrition, exercises, or any prenatal questions..."
+      />
     </div>
   );
 };
