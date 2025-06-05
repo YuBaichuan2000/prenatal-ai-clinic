@@ -14,16 +14,12 @@ const ChatContainer = () => {
     retryMessage,
     clearError,
     messagesEndRef,
-    currentConversationId
+    currentConversationId,
+    scrollToBottomImmediate,
+    scrollToMessage
   } = useChatContext();
 
   const [inputMessage, setInputMessage] = useState('');
-  const [forceRender, setForceRender] = useState(0);
-
-  // Force re-render when messages change
-  useEffect(() => {
-    setForceRender(prev => prev + 1);
-  }, [messages, currentConversationId]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -42,6 +38,7 @@ const ChatContainer = () => {
 
   const handleQuickMessage = async (message) => {
     await sendMessage(message);
+    // The sendMessage function will handle the scrolling to show the user's message
   };
 
   return (
@@ -83,7 +80,7 @@ const ChatContainer = () => {
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4" key={forceRender}>
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {/* Simplified conditional logic */}
         {(() => {
           if (isLoading && messages.length === 0) {
@@ -124,6 +121,8 @@ const ChatContainer = () => {
                     <div className="text-sm text-gray-600">Safe exercises and activities</div>
                   </button>
                 </div>
+                {/* Scroll anchor for consistent behavior */}
+                <div ref={messagesEndRef} />
               </div>
             );
           } else {
@@ -131,11 +130,12 @@ const ChatContainer = () => {
               <>
                 {/* Messages */}
                 {messages.map((message, index) => (
-                  <MessageBubble
-                    key={message.id}
-                    message={message}
-                    onRetry={() => retryMessage(message.id)}
-                  />
+                  <div key={message.id} data-message-id={message.id}>
+                    <MessageBubble
+                      message={message}
+                      onRetry={() => retryMessage(message.id)}
+                    />
+                  </div>
                 ))}
                 
                 {/* Typing Indicator */}
