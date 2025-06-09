@@ -75,7 +75,12 @@ app.get('/', (req, res) => {
       conversations: 'GET /api/conversations/:user_id',
       messages: 'GET /api/conversations/:conversation_id/messages',
       newConversation: 'POST /api/conversations/new',
-      deleteConversation: 'DELETE /api/conversations/:conversation_id'
+      deleteConversation: 'DELETE /api/conversations/:conversation_id',
+      // Favorites endpoints
+      addFavorite: 'POST /api/favorites',
+      removeFavorite: 'DELETE /api/favorites/:message_id',
+      getFavorites: 'GET /api/favorites/:user_id',
+      checkFavorite: 'GET /api/favorites/:user_id/check/:message_id'
     }
   });
 });

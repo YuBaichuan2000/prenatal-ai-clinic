@@ -121,6 +121,8 @@ const ChatContainer = () => {
                       timestamp={message.timestamp}
                       isUser={message.type === 'user'}
                       isLoading={false}
+                      messageId={message.id}
+                      conversationId={currentConversationId}
                     />
                     {message.status === 'error' && (
                       <div className="mt-2 pt-2 border-t border-red-200">
@@ -145,6 +147,8 @@ const ChatContainer = () => {
                     message=""
                     isUser={false}
                     isLoading={true}
+                    messageId={null}
+                    conversationId={currentConversationId}
                   />
                 )}
                 

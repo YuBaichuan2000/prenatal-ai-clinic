@@ -40,6 +40,18 @@ messages: {
   timestamp: Date,
   metadata: object (optional)
 }
+
+favorites: {
+  _id: ObjectId,
+  favorite_id: string (UUID),
+  user_id: string,
+  message_id: string,
+  conversation_id: string,
+  message_content: string,
+  message_timestamp: Date,
+  favorited_at: Date,
+  metadata: object (optional)
+}
 */
 
 // Initialize collections with indexes
@@ -50,6 +62,11 @@ const initializeDB = async () => {
   await database.collection('conversations').createIndex({ conversation_id: 1 }, { unique: true });
   await database.collection('conversations').createIndex({ user_id: 1, updated_at: -1 });
   await database.collection('messages').createIndex({ conversation_id: 1, timestamp: 1 });
+  
+  // Favorites collection indexes
+  await database.collection('favorites').createIndex({ user_id: 1, favorited_at: -1 });
+  await database.collection('favorites').createIndex({ user_id: 1, message_id: 1 }, { unique: true });
+  await database.collection('favorites').createIndex({ conversation_id: 1 });
   
   console.log('✅ Database indexes created');
 };
@@ -294,6 +311,175 @@ router.delete('/conversations/:conversation_id', async (req, res) => {
   } catch (error) {
     console.error('❌ Delete conversation error:', error);
     res.status(500).json({ error: 'Failed to delete conversation' });
+  }
+});
+
+// 6. POST /api/favorites - Add message to favorites
+router.post('/favorites', async (req, res) => {
+  try {
+    const { user_id, message_id, conversation_id } = req.body;
+    
+    if (!user_id || !message_id || !conversation_id) {
+      return res.status(400).json({ 
+        error: 'user_id, message_id, and conversation_id are required' 
+      });
+    }
+    
+    const database = await connectDB();
+    
+    // Check if message exists and get its content
+    const message = await database.collection('messages')
+      .findOne({ message_id, conversation_id });
+    
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+    
+    // Check if already favorited
+    const existingFavorite = await database.collection('favorites')
+      .findOne({ user_id, message_id });
+    
+    if (existingFavorite) {
+      return res.status(409).json({ error: 'Message already favorited' });
+    }
+    
+    const favorite_id = uuidv4();
+    const favorited_at = new Date();
+    
+    await database.collection('favorites').insertOne({
+      favorite_id,
+      user_id,
+      message_id,
+      conversation_id,
+      message_content: message.content,
+      message_timestamp: message.timestamp,
+      favorited_at,
+      metadata: {
+        message_type: message.type,
+        original_metadata: message.metadata
+      }
+    });
+    
+    console.log(`💖 Message favorited: ${message_id} by user: ${user_id}`);
+    
+    res.json({ 
+      favorite_id,
+      message: 'Message added to favorites',
+      favorited_at
+    });
+    
+  } catch (error) {
+    console.error('❌ Add favorite error:', error);
+    res.status(500).json({ error: 'Failed to add favorite' });
+  }
+});
+
+// 7. DELETE /api/favorites/:message_id - Remove message from favorites
+router.delete('/favorites/:message_id', async (req, res) => {
+  try {
+    const { message_id } = req.params;
+    const { user_id } = req.body;
+    
+    if (!user_id) {
+      return res.status(400).json({ error: 'user_id is required' });
+    }
+    
+    const database = await connectDB();
+    
+    const result = await database.collection('favorites')
+      .deleteOne({ user_id, message_id });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Favorite not found' });
+    }
+    
+    console.log(`💔 Message unfavorited: ${message_id} by user: ${user_id}`);
+    
+    res.json({ message: 'Message removed from favorites' });
+    
+  } catch (error) {
+    console.error('❌ Remove favorite error:', error);
+    res.status(500).json({ error: 'Failed to remove favorite' });
+  }
+});
+
+// 8. GET /api/favorites/:user_id - Get user's favorite messages with pagination
+router.get('/favorites/:user_id', async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+    
+    const database = await connectDB();
+    
+    // Get favorites with pagination
+    const favorites = await database.collection('favorites')
+      .find({ user_id })
+      .sort({ favorited_at: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .toArray();
+    
+    // Get total count for pagination
+    const totalCount = await database.collection('favorites')
+      .countDocuments({ user_id });
+    
+    // Get conversation titles for each favorite
+    const conversationIds = [...new Set(favorites.map(f => f.conversation_id))];
+    const conversations = await database.collection('conversations')
+      .find({ conversation_id: { $in: conversationIds } })
+      .toArray();
+    
+    const conversationMap = conversations.reduce((acc, conv) => {
+      acc[conv.conversation_id] = conv.title;
+      return acc;
+    }, {});
+    
+    // Enrich favorites with conversation titles
+    const enrichedFavorites = favorites.map(favorite => ({
+      ...favorite,
+      conversation_title: conversationMap[favorite.conversation_id] || 'Untitled Conversation'
+    }));
+    
+    res.json({
+      favorites: enrichedFavorites,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limitNum),
+        hasNext: pageNum < Math.ceil(totalCount / limitNum),
+        hasPrev: pageNum > 1
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Get favorites error:', error);
+    res.status(500).json({ error: 'Failed to fetch favorites' });
+  }
+});
+
+// 9. GET /api/favorites/:user_id/check/:message_id - Check if message is favorited
+router.get('/favorites/:user_id/check/:message_id', async (req, res) => {
+  try {
+    const { user_id, message_id } = req.params;
+    
+    const database = await connectDB();
+    
+    const favorite = await database.collection('favorites')
+      .findOne({ user_id, message_id });
+    
+    res.json({ 
+      is_favorited: !!favorite,
+      favorite_id: favorite?.favorite_id || null
+    });
+    
+  } catch (error) {
+    console.error('❌ Check favorite error:', error);
+    res.status(500).json({ error: 'Failed to check favorite status' });
   }
 });
 

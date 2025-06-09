@@ -121,6 +121,55 @@ export const chatApi = {
   }
 };
 
+// Favorites API Functions
+export const favoritesApi = {
+  // Add message to favorites
+  addFavorite: async (messageId, conversationId, userId = 'default-user') => {
+    try {
+      const response = await apiClient.post('/api/favorites', {
+        user_id: userId,
+        message_id: messageId,
+        conversation_id: conversationId
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to add favorite');
+    }
+  },
+
+  // Remove message from favorites
+  removeFavorite: async (messageId, userId = 'default-user') => {
+    try {
+      const response = await apiClient.delete(`/api/favorites/${messageId}`, {
+        data: { user_id: userId }
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to remove favorite');
+    }
+  },
+
+  // Get user's favorite messages with pagination
+  getFavorites: async (userId = 'default-user', page = 1, limit = 10) => {
+    try {
+      const response = await apiClient.get(`/api/favorites/${userId}?page=${page}&limit=${limit}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to fetch favorites');
+    }
+  },
+
+  // Check if message is favorited
+  checkFavorite: async (messageId, userId = 'default-user') => {
+    try {
+      const response = await apiClient.get(`/api/favorites/${userId}/check/${messageId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to check favorite status');
+    }
+  }
+};
+
 // Health check API
 export const healthApi = {
   checkHealth: async () => {

@@ -1,15 +1,57 @@
 // frontend/src/components/Chat/ChatMessage.jsx
-import React from 'react'
-import { Bot, User, Clock } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Bot, User, Clock, Heart } from 'lucide-react'
 import { format } from 'date-fns'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
+import { favoritesApi } from '../../services/api'
 
-const ChatMessage = ({ message, timestamp, isUser, isLoading = false }) => {
+const ChatMessage = ({ message, timestamp, isUser, isLoading = false, messageId, conversationId }) => {
+  const [isFavorited, setIsFavorited] = useState(false)
+  const [isHeartLoading, setIsHeartLoading] = useState(false)
+
   const formatTime = (date) => {
     if (!date) return ''
     return format(new Date(date), 'HH:mm')
+  }
+
+  // Check if message is already favorited when component mounts
+  useEffect(() => {
+    if (!isUser && messageId) {
+      checkFavoriteStatus()
+    }
+  }, [isUser, messageId])
+
+  const checkFavoriteStatus = async () => {
+    try {
+      const result = await favoritesApi.checkFavorite(messageId)
+      setIsFavorited(result.is_favorited)
+    } catch (error) {
+      console.error('Failed to check favorite status:', error)
+    }
+  }
+
+  const handleHeartClick = async () => {
+    if (isHeartLoading || !messageId || !conversationId) return
+
+    setIsHeartLoading(true)
+    try {
+      if (isFavorited) {
+        await favoritesApi.removeFavorite(messageId)
+        setIsFavorited(false)
+        console.log('💔 Message unfavorited')
+      } else {
+        await favoritesApi.addFavorite(messageId, conversationId)
+        setIsFavorited(true)
+        console.log('💖 Message favorited')
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error)
+      // Could show a toast notification here
+    } finally {
+      setIsHeartLoading(false)
+    }
   }
 
   if (isLoading) {
@@ -57,7 +99,7 @@ const ChatMessage = ({ message, timestamp, isUser, isLoading = false }) => {
         <Bot className="h-4 w-4 text-blue-600" />
       </div>
       <div className="flex-1">
-        <div className="message-ai">
+        <div className="message-ai relative">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm, remarkBreaks]}
             components={{
@@ -125,7 +167,29 @@ const ChatMessage = ({ message, timestamp, isUser, isLoading = false }) => {
           >
             {message}
           </ReactMarkdown>
+          
+          {/* Heart button positioned in bottom right corner of message */}
+          {messageId && (
+            <button
+              onClick={handleHeartClick}
+              disabled={isHeartLoading}
+              className={`absolute bottom-2 right-2 p-1 rounded-lg transition-all duration-200 hover:bg-gray-100 ${
+                isFavorited 
+                  ? 'text-red-500 hover:text-red-600' 
+                  : 'text-gray-400 hover:text-red-400'
+              } ${isHeartLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <Heart 
+                className={`h-4 w-4 transition-all duration-200 ${
+                  isFavorited ? 'fill-current' : ''
+                } ${isHeartLoading ? 'animate-pulse' : ''}`} 
+              />
+            </button>
+          )}
         </div>
+        
+        {/* Timestamp below the message */}
         {timestamp && (
           <div className="flex items-center space-x-1 mt-1 text-xs text-gray-400">
             <Clock className="h-3 w-3" />

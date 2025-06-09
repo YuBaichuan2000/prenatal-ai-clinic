@@ -1,12 +1,13 @@
 // frontend/src/hooks/useChat.js
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { chatApi } from '../services/api';
 
 export const useChat = (userId = 'default-user') => {
   // Get conversation ID from URL params (React Router integration)
   const { conversationId: urlConversationId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Chat state
   const [messages, setMessages] = useState([]);
@@ -29,8 +30,13 @@ export const useChat = (userId = 'default-user') => {
   useEffect(() => {
     if (urlConversationId && urlConversationId !== currentConversationId) {
       setCurrentConversationId(urlConversationId);
+    } else if (!urlConversationId && location.pathname === '/chat' && currentConversationId) {
+      // Only clear if we're specifically on /chat route (not during navigation transitions)
+      // This handles manual URL changes from /chat/id to /chat
+      setCurrentConversationId(null);
+      setMessages([]); // Clear messages when navigating away from a conversation
     }
-  }, [urlConversationId, currentConversationId]);
+  }, [urlConversationId, currentConversationId, location.pathname]);
 
   // Persist currentConversationId to localStorage whenever it changes
   useEffect(() => {

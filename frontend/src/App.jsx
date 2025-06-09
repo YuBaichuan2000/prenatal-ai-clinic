@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { MessageCircle, Heart, Baby, Sparkles, Shield, Clock, Wifi, WifiOff } from 'lucide-react'
 import MainLayout from './components/Layout/MainLayout'
 import ChatContainer from './components/Chat/ChatContainer'
+import PregnancyTips from './components/PregnancyTips'
 import { ChatContextProvider, useChatContext } from './contexts/ChatContext'
 import { checkApiConnection } from './services/api'
 
@@ -232,6 +233,15 @@ function HomeRoute() {
   return <WelcomeScreen isApiConnected={isApiConnected} />
 }
 
+function PregnancyTipsRoute() {
+  // Make this route independent of chat context to avoid navigation conflicts
+  return (
+    <MainLayout>
+      <PregnancyTips />
+    </MainLayout>
+  )
+}
+
 // Main App Component with Router
 function App() {
   return (
@@ -241,6 +251,7 @@ function App() {
           <Route path="/" element={<HomeRoute />} />
           <Route path="/chat" element={<ChatRoute />} />
           <Route path="/chat/:conversationId" element={<ChatRoute />} />
+          <Route path="/pregnancy-tips" element={<PregnancyTipsRoute />} />
         </Routes>
       </ChatContextProvider>
     </BrowserRouter>
