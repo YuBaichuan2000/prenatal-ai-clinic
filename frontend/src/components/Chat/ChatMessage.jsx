@@ -76,7 +76,7 @@ const ChatMessage = ({ message, timestamp, isUser, isLoading = false }) => {
               ),
               // Ensure lists render properly
               ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>,
-              ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>,
+              ol: ({ children }) => <ol className="list-decimal mb-3 space-y-1 pl-4">{children}</ol>,
               li: ({ children }) => <li className="leading-relaxed">{children}</li>,
               // Style headings
               h1: ({ children }) => <h1 className="text-xl font-semibold mb-3 text-gray-800">{children}</h1>,

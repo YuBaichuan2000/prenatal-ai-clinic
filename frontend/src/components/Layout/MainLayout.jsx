@@ -1,8 +1,10 @@
 "use client"
 import { Baby, Plus, MessageCircle, Clock, Heart, Trash2 } from "lucide-react"
+import { useParams } from "react-router-dom"
 import { useChatContext } from "../../contexts/ChatContext"
 
 const MainLayout = ({ children }) => {
+  const { conversationId: urlConversationId } = useParams()
   const {
     conversations,
     currentConversationId,
@@ -11,6 +13,23 @@ const MainLayout = ({ children }) => {
     deleteConversation,
     isLoading,
   } = useChatContext()
+
+  // Use URL conversation ID for highlighting, fallback to context
+  const activeConversationId = urlConversationId || currentConversationId
+
+  // Utility function to strip markdown formatting for preview
+  const stripMarkdown = (text) => {
+    if (!text) return ""
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text**
+      .replace(/\*(.*?)\*/g, '$1')     // Remove italic *text*
+      .replace(/`(.*?)`/g, '$1')       // Remove inline code `text`
+      .replace(/#{1,6}\s/g, '')        // Remove headers # ## ###
+      .replace(/>\s/g, '')             // Remove blockquotes >
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links [text](url) -> text
+      .replace(/\n+/g, ' ')            // Replace newlines with spaces
+      .trim()
+  }
 
   const handleConversationClick = (conversationId) => {
     console.log("Clicking conversation:", conversationId, "Current:", currentConversationId)
@@ -113,7 +132,7 @@ const MainLayout = ({ children }) => {
                     key={conversation.conversation_id}
                     onClick={() => handleConversationClick(conversation.conversation_id)}
                     className={`group p-3 rounded-xl cursor-pointer transition-all duration-200 border relative ${
-                      currentConversationId === conversation.conversation_id
+                      activeConversationId === conversation.conversation_id
                         ? "bg-blue-50 border-blue-200 shadow-sm"
                         : "hover:bg-gray-50 border-transparent hover:border-gray-200"
                     }`}
@@ -124,9 +143,7 @@ const MainLayout = ({ children }) => {
                           {conversation.title || "Untitled Conversation"}
                         </div>
                         <div className="text-xs text-gray-500 mb-1 line-clamp-2">
-                          {conversation.last_message_preview && conversation.last_message_preview.length > 0
-                            ? conversation.last_message_preview
-                            : "No messages yet"}
+                          {stripMarkdown(conversation.last_message_preview) || "No messages yet"}
                         </div>
                         <div className="flex items-center text-xs text-gray-400">
                           <Clock className="h-3 w-3 mr-1" />

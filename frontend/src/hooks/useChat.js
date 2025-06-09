@@ -1,12 +1,20 @@
 // frontend/src/hooks/useChat.js
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { chatApi } from '../services/api';
 
 export const useChat = (userId = 'default-user') => {
+  // Get conversation ID from URL params (React Router integration)
+  const { conversationId: urlConversationId } = useParams();
+  const navigate = useNavigate();
+  
   // Chat state
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([]);
-  const [currentConversationId, setCurrentConversationId] = useState(null);
+  const [currentConversationId, setCurrentConversationId] = useState(() => {
+    // Priority: URL params > localStorage > null
+    return urlConversationId || localStorage.getItem('currentConversationId') || null;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
@@ -16,6 +24,31 @@ export const useChat = (userId = 'default-user') => {
   // Refs for managing state
   const abortControllerRef = useRef(null);
   const messagesEndRef = useRef(null);
+
+  // Sync currentConversationId with URL params
+  useEffect(() => {
+    if (urlConversationId && urlConversationId !== currentConversationId) {
+      setCurrentConversationId(urlConversationId);
+    }
+  }, [urlConversationId, currentConversationId]);
+
+  // Persist currentConversationId to localStorage whenever it changes
+  useEffect(() => {
+    if (currentConversationId) {
+      localStorage.setItem('currentConversationId', currentConversationId);
+    } else {
+      localStorage.removeItem('currentConversationId');
+    }
+  }, [currentConversationId]);
+
+  // Helper function to navigate to conversation
+  const navigateToConversation = useCallback((conversationId) => {
+    if (conversationId) {
+      navigate(`/chat/${conversationId}`);
+    } else {
+      navigate('/chat');
+    }
+  }, [navigate]);
 
   // Load conversations on mount
   useEffect(() => {
@@ -71,6 +104,11 @@ export const useChat = (userId = 'default-user') => {
       console.log('Loading conversation:', conversationId);
       setIsLoading(true);
       setError(null);
+      
+      // Navigate to the conversation URL if not already there
+      if (conversationId !== urlConversationId) {
+        navigateToConversation(conversationId);
+      }
       
       // First verify the conversation exists in our list
       const conversation = conversations.find(c => c.conversation_id === conversationId);
@@ -131,7 +169,7 @@ export const useChat = (userId = 'default-user') => {
     } finally {
       setIsLoading(false);
     }
-  }, [conversations]);
+  }, [conversations, navigateToConversation, urlConversationId]);
 
   // Send a message
   const sendMessage = useCallback(async (messageContent) => {
@@ -198,6 +236,8 @@ export const useChat = (userId = 'default-user') => {
       // Update current conversation ID if this was a new conversation
       if (!currentConversationId) {
         setCurrentConversationId(response.conversation_id);
+        // Navigate to the new conversation
+        navigateToConversation(response.conversation_id);
         // Reload conversations to show the new one
         loadConversations();
       }
@@ -221,9 +261,9 @@ export const useChat = (userId = 'default-user') => {
       setIsTyping(false);
       abortControllerRef.current = null;
     }
-  }, [currentConversationId, userId, loadConversations]);
+  }, [currentConversationId, userId, loadConversations, navigateToConversation]);
 
-  // Start a new conversation - FIXED to ensure chat interface shows
+  // Start a new conversation - Updated to use navigation
   const startNewConversation = useCallback(() => {
     console.log('Starting new conversation');
     setMessages([]);
@@ -231,9 +271,9 @@ export const useChat = (userId = 'default-user') => {
     setError(null);
     setIsNewConversationStarted(true);
     
-    // Remove the automatic welcome message to show the empty state UI
-    // The ChatContainer.jsx will handle the empty state display
-  }, []);
+    // Navigate to new chat URL
+    navigateToConversation(null);
+  }, [navigateToConversation]);
 
   // Delete a conversation
   const deleteConversation = useCallback(async (conversationId) => {
@@ -305,6 +345,9 @@ export const useChat = (userId = 'default-user') => {
     // Utils
     scrollToBottom,
     scrollToBottomImmediate,
-    scrollToMessage
+    scrollToMessage,
+    
+    // Router
+    navigateToConversation
   };
 };

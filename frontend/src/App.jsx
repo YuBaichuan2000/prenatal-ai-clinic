@@ -1,87 +1,14 @@
 // frontend/src/App.jsx
 import React, { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { MessageCircle, Heart, Baby, Sparkles, Shield, Clock, Wifi, WifiOff } from 'lucide-react'
 import MainLayout from './components/Layout/MainLayout'
 import ChatContainer from './components/Chat/ChatContainer'
 import { ChatContextProvider, useChatContext } from './contexts/ChatContext'
 import { checkApiConnection } from './services/api'
 
-// Inner component that uses the chat context
-function AppContent() {
-  const [isApiConnected, setIsApiConnected] = useState(null)
-  const { 
-    conversations, 
-    currentConversationId,
-    loadConversation, 
-    isLoading,
-    messages,
-    isNewConversationStarted
-  } = useChatContext()
-  const [hasCheckedInitialLoad, setHasCheckedInitialLoad] = useState(false)
-
-  // Check API connection on mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      const connected = await checkApiConnection()
-      setIsApiConnected(connected)
-    }
-    
-    checkConnection()
-    
-    // Check connection periodically
-    const interval = setInterval(checkConnection, 30000) // Every 30 seconds
-    return () => clearInterval(interval)
-  }, [])
-
-  // Auto-load most recent conversation when conversations are loaded
-  useEffect(() => {
-    if (!hasCheckedInitialLoad && conversations.length > 0 && !isLoading) {
-      console.log('Auto-loading most recent conversation:', conversations[0])
-      // Sort by updated_at to get the most recent, then load it
-      const sortedConversations = [...conversations].sort((a, b) => 
-        new Date(b.updated_at) - new Date(a.updated_at)
-      )
-      const mostRecent = sortedConversations[0]
-      if (mostRecent) {
-        loadConversation(mostRecent.conversation_id)
-      }
-      setHasCheckedInitialLoad(true)
-    } else if (!hasCheckedInitialLoad && conversations.length === 0 && !isLoading) {
-      // No conversations exist, mark as checked so we show welcome screen
-      setHasCheckedInitialLoad(true)
-    }
-  }, [conversations, loadConversation, isLoading, hasCheckedInitialLoad])
-
-  // Show loading while we're checking for conversations or loading the initial conversation
-  if (!hasCheckedInitialLoad || (conversations.length > 0 && isLoading)) {
-    return (
-      <MainLayout>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-full animate-pulse"></div>
-            <span className="text-gray-600">Loading your conversations...</span>
-          </div>
-        </div>
-      </MainLayout>
-    )
-  }
-
-  // Show chat interface if:
-  // 1. We have a current conversation ID (new or existing), OR
-  // 2. We have messages in the current session, OR
-  // 3. We have existing conversations and one should be loaded, OR
-  // 4. A new conversation has been started
-  const showChatInterface = currentConversationId || messages.length > 0 || conversations.length > 0 || isNewConversationStarted
-
-  if (showChatInterface) {
-    return (
-      <MainLayout>
-        <ChatContainer />
-      </MainLayout>
-    )
-  }
-
-  // No conversations and no current chat - show welcome screen
+// Welcome Screen Component (extracted from original App)
+function WelcomeScreen({ isApiConnected }) {
   return (
     <MainLayout>
       {/* Professional Medical Welcome Area */}
@@ -205,11 +132,118 @@ function AppContent() {
   )
 }
 
+// Main App Content Component (preserves existing logic)
+function AppContent() {
+  const [isApiConnected, setIsApiConnected] = useState(null)
+  const { 
+    conversations, 
+    currentConversationId,
+    loadConversation, 
+    isLoading,
+    messages,
+    isNewConversationStarted
+  } = useChatContext()
+  const [hasCheckedInitialLoad, setHasCheckedInitialLoad] = useState(false)
+
+  // Check API connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      const connected = await checkApiConnection()
+      setIsApiConnected(connected)
+    }
+    
+    checkConnection()
+    
+    // Check connection periodically
+    const interval = setInterval(checkConnection, 30000) // Every 30 seconds
+    return () => clearInterval(interval)
+  }, [])
+
+  // Auto-load conversation logic (preserved from original)
+  // Only auto-load if we have a currentConversationId (from URL or localStorage)
+  useEffect(() => {
+    if (!hasCheckedInitialLoad && conversations.length > 0 && !isLoading && currentConversationId) {
+      console.log('Auto-loading conversation logic triggered for:', currentConversationId);
+      
+      const persistedConversation = conversations.find(c => c.conversation_id === currentConversationId);
+      if (persistedConversation) {
+        console.log('Loading persisted conversation:', currentConversationId);
+        loadConversation(currentConversationId);
+        setHasCheckedInitialLoad(true);
+        return;
+      } else {
+        console.log('Persisted conversation not found, clearing localStorage');
+        // Clear invalid persisted ID
+        localStorage.removeItem('currentConversationId');
+      }
+      setHasCheckedInitialLoad(true);
+    } else if (!hasCheckedInitialLoad && conversations.length === 0 && !currentConversationId && !isLoading) {
+      // No conversations exist AND no current conversation ID, mark as checked
+      setHasCheckedInitialLoad(true);
+    }
+  }, [conversations, loadConversation, isLoading, hasCheckedInitialLoad, currentConversationId])
+
+  // Show loading while we're checking for conversations or loading the initial conversation
+  if (!hasCheckedInitialLoad || (currentConversationId && conversations.length > 0 && isLoading) || (currentConversationId && conversations.length === 0 && !isLoading)) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-full animate-pulse"></div>
+            <span className="text-gray-600">Loading your conversations...</span>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  return {
+    isApiConnected,
+    conversations: conversations || [], // Ensure conversations is always an array
+    hasCheckedInitialLoad
+  }
+}
+
+// Route Components
+function ChatRoute() {
+  const result = AppContent()
+  
+  if (typeof result !== 'object') {
+    return result // Return loading component
+  }
+
+  return (
+    <MainLayout>
+      <ChatContainer />
+    </MainLayout>
+  )
+}
+
+function HomeRoute() {
+  const result = AppContent()
+  
+  if (typeof result !== 'object') {
+    return result // Return loading component
+  }
+
+  const { isApiConnected } = result
+
+  // Always show welcome screen at home, no automatic redirection
+  return <WelcomeScreen isApiConnected={isApiConnected} />
+}
+
+// Main App Component with Router
 function App() {
   return (
-    <ChatContextProvider>
-      <AppContent />
-    </ChatContextProvider>
+    <BrowserRouter>
+      <ChatContextProvider>
+        <Routes>
+          <Route path="/" element={<HomeRoute />} />
+          <Route path="/chat" element={<ChatRoute />} />
+          <Route path="/chat/:conversationId" element={<ChatRoute />} />
+        </Routes>
+      </ChatContextProvider>
+    </BrowserRouter>
   )
 }
 
