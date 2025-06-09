@@ -110,7 +110,11 @@ const MainLayout = ({ children }) => {
         <div className="p-6 border-b border-gray-200 relative">
           {!isSidebarCollapsed && (
             <>
-              <div className="flex items-center space-x-3 mb-2">
+              <div 
+                className="flex items-center space-x-3 mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => navigate('/', { replace: true })}
+                title="Go to Home"
+              >
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                   <Baby className="h-5 w-5 text-white" />
                 </div>
@@ -126,7 +130,11 @@ const MainLayout = ({ children }) => {
           )}
           
           {isSidebarCollapsed && (
-            <div className="flex justify-center">
+            <div 
+              className="flex justify-center cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/', { replace: true })}
+              title="Go to Home"
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                 <Baby className="h-5 w-5 text-white" />
               </div>

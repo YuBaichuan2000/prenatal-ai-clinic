@@ -14,10 +14,10 @@ const PORT = process.env.PORT || 3001;
 // Security middleware
 app.use(helmet());
 
-// Rate limiting - more generous for chat
+// Rate limiting - more generous for chat and health checks
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // Increased for chat usage
+  max: 500, // Increased from 200 to 500 requests per 15 minutes
   message: {
     error: 'Too many requests from this IP, please try again later.'
   }

@@ -188,6 +188,11 @@ export const checkApiConnection = async () => {
     await healthApi.checkHealth();
     return true;
   } catch (error) {
+    // Handle rate limiting more gracefully
+    if (error.response?.status === 429) {
+      console.warn('⚠️ API rate limit reached, will retry later');
+      return false; // Return false but don't log as error
+    }
     console.error('❌ API connection failed:', error);
     return false;
   }

@@ -155,8 +155,8 @@ function AppContent() {
     
     checkConnection()
     
-    // Check connection periodically
-    const interval = setInterval(checkConnection, 30000) // Every 30 seconds
+    // Check connection periodically - reduced frequency to avoid rate limiting
+    const interval = setInterval(checkConnection, 120000) // Every 2 minutes instead of 30 seconds
     return () => clearInterval(interval)
   }, [])
 
@@ -221,13 +221,23 @@ function ChatRoute() {
 }
 
 function HomeRoute() {
-  const result = AppContent()
-  
-  if (typeof result !== 'object') {
-    return result // Return loading component
-  }
+  // Make HomeRoute independent of chat context auto-loading to prevent 
+  // automatic redirection to recent chat when clicking logo
+  const [isApiConnected, setIsApiConnected] = useState(null)
 
-  const { isApiConnected } = result
+  // Check API connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      const connected = await checkApiConnection()
+      setIsApiConnected(connected)
+    }
+    
+    checkConnection()
+    
+    // Check connection periodically - reduced frequency to avoid rate limiting
+    const interval = setInterval(checkConnection, 120000) // Every 2 minutes instead of 30 seconds
+    return () => clearInterval(interval)
+  }, [])
 
   // Always show welcome screen at home, no automatic redirection
   return <WelcomeScreen isApiConnected={isApiConnected} />
