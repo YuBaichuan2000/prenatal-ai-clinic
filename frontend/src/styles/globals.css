@@ -102,11 +102,140 @@ h6 {
   border-radius: 16px;
   border-bottom-left-radius: 4px;
   padding: 12px 16px;
-  max-width: 480px;
+  max-width: 600px;
   border: 1px solid var(--gray-200);
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04), 0 1px 8px rgba(15, 23, 42, 0.08);
   line-height: 1.6;
   font-weight: 400;
+}
+
+/* Markdown styling within AI messages */
+.message-ai h1,
+.message-ai h2,
+.message-ai h3,
+.message-ai h4,
+.message-ai h5,
+.message-ai h6 {
+  color: var(--gray-800);
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  line-height: 1.4;
+}
+
+.message-ai h1 { font-size: 20px; }
+.message-ai h2 { font-size: 18px; }
+.message-ai h3 { font-size: 16px; }
+.message-ai h4 { font-size: 15px; }
+.message-ai h5 { font-size: 14px; }
+.message-ai h6 { font-size: 13px; }
+
+.message-ai p {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.message-ai ul,
+.message-ai ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.message-ai li {
+  margin: 4px 0;
+}
+
+.message-ai strong {
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.message-ai em {
+  font-style: italic;
+  color: var(--gray-600);
+}
+
+.message-ai code {
+  background: var(--gray-100);
+  color: var(--gray-800);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  font-size: 13px;
+}
+
+.message-ai pre {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+
+.message-ai pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.message-ai blockquote {
+  border-left: 3px solid var(--medical-blue-500);
+  background: var(--gray-50);
+  margin: 12px 0;
+  padding: 8px 16px;
+  border-radius: 0 8px 8px 0;
+}
+
+.message-ai blockquote p {
+  margin: 4px 0;
+  color: var(--gray-600);
+  font-style: italic;
+}
+
+.message-ai a {
+  color: var(--medical-blue-600);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.message-ai a:hover {
+  color: var(--medical-blue-700);
+}
+
+.message-ai hr {
+  border: none;
+  height: 1px;
+  background: var(--gray-200);
+  margin: 16px 0;
+}
+
+.message-ai table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.message-ai th,
+.message-ai td {
+  border: 1px solid var(--gray-200);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message-ai th {
+  background: var(--gray-50);
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+/* Ensure first and last elements don't have extra margins */
+.message-ai > *:first-child {
+  margin-top: 0;
+}
+
+.message-ai > *:last-child {
+  margin-bottom: 0;
 }
 
 /* Professional Button System */
@@ -332,7 +461,7 @@ h6 {
   }
 
   .message-ai {
-    max-width: 400px;
+    max-width: 500px;
     padding: 10px 14px;
   }
 }

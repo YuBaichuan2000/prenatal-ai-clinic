@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { useChatContext } from '../../contexts/ChatContext';
 import ChatInput from './ChatInput';
+import ChatMessage from './ChatMessage';
 
 const ChatContainer = () => {
   const {
@@ -115,30 +116,36 @@ const ChatContainer = () => {
                 {/* Messages */}
                 {messages.map((message, index) => (
                   <div key={message.id} data-message-id={message.id}>
-                    <MessageBubble
-                      message={message}
-                      onRetry={() => retryMessage(message.id)}
+                    <ChatMessage
+                      message={message.content}
+                      timestamp={message.timestamp}
+                      isUser={message.type === 'user'}
+                      isLoading={false}
                     />
+                    {message.status === 'error' && (
+                      <div className="mt-2 pt-2 border-t border-red-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-red-600">{message.error}</span>
+                          <button
+                            onClick={() => retryMessage(message.id)}
+                            className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center space-x-1"
+                          >
+                            <RefreshCw className="h-3 w-3" />
+                            <span>Retry</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
                 
                 {/* Typing Indicator */}
                 {isTyping && (
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <div className="w-4 h-4 bg-blue-600 rounded-full"></div>
-                    </div>
-                    <div className="message-ai">
-                      <div className="flex items-center space-x-1">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                        </div>
-                        <span className="text-sm text-gray-500 ml-2">AI is thinking...</span>
-                      </div>
-                    </div>
-                  </div>
+                  <ChatMessage
+                    message=""
+                    isUser={false}
+                    isLoading={true}
+                  />
                 )}
                 
                 {/* Scroll anchor */}
@@ -155,54 +162,6 @@ const ChatContainer = () => {
         isLoading={isTyping}
         placeholder="Ask me about pregnancy, nutrition, exercises, or any prenatal questions..."
       />
-    </div>
-  );
-};
-
-// Message Bubble Component
-const MessageBubble = ({ message, onRetry }) => {
-  const isUser = message.type === 'user';
-  const hasError = message.status === 'error';
-
-  return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} items-start space-x-3`}>
-      {!isUser && (
-        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-          <div className="w-4 h-4 bg-blue-600 rounded-full"></div>
-        </div>
-      )}
-      
-      <div className={`max-w-xs lg:max-w-md ${isUser ? 'ml-auto' : ''}`}>
-        <div className={`${isUser ? 'message-user' : 'message-ai'} ${hasError ? 'border-red-200 bg-red-50' : ''}`}>
-          {message.content}
-          
-          {hasError && (
-            <div className="mt-2 pt-2 border-t border-red-200">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-red-600">{message.error}</span>
-                <button
-                  onClick={onRetry}
-                  className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center space-x-1"
-                >
-                  <RefreshCw className="h-3 w-3" />
-                  <span>Retry</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className={`text-xs text-gray-500 mt-1 ${isUser ? 'text-right' : 'text-left'}`}>
-          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          {message.status === 'sending' && <span className="ml-1">Sending...</span>}
-        </div>
-      </div>
-      
-      {isUser && (
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-          <div className="w-4 h-4 bg-white rounded-full"></div>
-        </div>
-      )}
     </div>
   );
 };
