@@ -3,6 +3,8 @@ import { Baby, Plus, MessageCircle, Clock, Heart, Trash2, ChevronLeft, ChevronRi
 import { useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useChatContext } from "../../contexts/ChatContext"
+import TopHeader from "./TopHeader"
+import PrenatalRoadmap from "./PrenatalRoadmap"
 
 const MainLayout = ({ children }) => {
   const { conversationId: urlConversationId } = useParams()
@@ -326,8 +328,14 @@ const MainLayout = ({ children }) => {
         )}
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col gradient-medical">{children}</div>
+      {/* Main Content Area with Right Sidebar */}
+      <div className="flex-1 flex">
+        <div className="flex-1 flex flex-col gradient-medical">
+          <TopHeader />
+          {children}
+        </div>
+        <PrenatalRoadmap />
+      </div>
     </div>
   )
 }
