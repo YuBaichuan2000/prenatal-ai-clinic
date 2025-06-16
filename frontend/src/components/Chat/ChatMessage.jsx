@@ -173,17 +173,19 @@ const ChatMessage = ({ message, timestamp, isUser, isLoading = false, messageId,
             <button
               onClick={handleHeartClick}
               disabled={isHeartLoading}
-              className={`absolute bottom-2 right-2 p-1 rounded-lg transition-all duration-200 hover:bg-gray-100 ${
+              className={`absolute bottom-2 right-2 p-1 rounded-lg transition-all duration-200 hover:bg-pink-50 border border-pink-200 shadow-md ${
                 isFavorited 
-                  ? 'text-red-500 hover:text-red-600' 
-                  : 'text-gray-400 hover:text-red-400'
+                  ? 'text-pink-400 hover:text-pink-500' 
+                  : 'text-gray-400 hover:text-pink-300'
               } ${isHeartLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+              style={{ zIndex: 2 }}
             >
               <Heart 
-                className={`h-4 w-4 transition-all duration-200 ${
-                  isFavorited ? 'fill-current' : ''
+                className={`h-6 w-6 transition-all duration-200 ${
+                  isFavorited ? 'fill-pink-300 stroke-pink-300' : 'stroke-gray-400'
                 } ${isHeartLoading ? 'animate-pulse' : ''}`} 
+                strokeWidth={1.8}
               />
             </button>
           )}

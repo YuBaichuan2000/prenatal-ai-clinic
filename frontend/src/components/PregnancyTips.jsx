@@ -213,14 +213,20 @@ const PregnancyTips = () => {
                     <button
                       onClick={() => handleRemoveFavorite(favorite.message_id, favorite.favorite_id)}
                       disabled={isRemoving}
-                      className={`p-1 rounded-lg transition-all duration-200 ${
+                      className={`p-1 rounded-lg transition-all duration-200 border border-pink-200 shadow-md hover:bg-pink-50 ${
                         isRemoving 
-                          ? 'text-gray-400 cursor-not-allowed' 
-                          : 'text-red-500 hover:text-red-600 hover:bg-red-50'
+                          ? 'text-gray-400 cursor-not-allowed opacity-60' 
+                          : 'text-pink-400 hover:text-pink-500'
                       }`}
                       title="Remove from favorites"
+                      style={{ zIndex: 2 }}
                     >
-                      <Heart className={`h-4 w-4 fill-current ${isRemoving ? 'animate-pulse' : ''}`} />
+                      <Heart 
+                        className={`h-6 w-6 transition-all duration-200 ${
+                          isRemoving ? 'stroke-gray-300' : 'fill-pink-300 stroke-pink-300'
+                        }`} 
+                        strokeWidth={1.8}
+                      />
                     </button>
                   </div>
 

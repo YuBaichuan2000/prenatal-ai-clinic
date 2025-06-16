@@ -109,7 +109,7 @@ const MainLayout = ({ children }) => {
         isSidebarCollapsed ? 'w-16' : 'w-80'
       }`}>
         {/* Sidebar Header - Medical Branding */}
-        <div className="p-6 border-b border-gray-200 relative">
+        <div className="p-6 border-b border-gray-200 relative" style={{ background: '#fff0f6' }}>
           {!isSidebarCollapsed && (
             <>
               <div 
@@ -117,8 +117,8 @@ const MainLayout = ({ children }) => {
                 onClick={() => navigate('/', { replace: true })}
                 title="Go to Home"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                  <Baby className="h-5 w-5 text-white" />
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                  <Baby className="h-5 w-5" style={{ color: '#ffc0cb' }} />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 clinic-heading">Prenatal AI Clinic</h1>
@@ -137,8 +137,8 @@ const MainLayout = ({ children }) => {
               onClick={() => navigate('/', { replace: true })}
               title="Go to Home"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <Baby className="h-5 w-5 text-white" />
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                <Baby className="h-5 w-5" style={{ color: '#ffc0cb' }} />
               </div>
             </div>
           )}
@@ -188,7 +188,11 @@ const MainLayout = ({ children }) => {
                   }`}
                   onClick={item.path !== '/appointments' ? item.onClick : undefined}
                 >
-                  <item.icon className="h-4 w-4 mr-3" />
+                  {item.path === '/pregnancy-tips' ? (
+                    <Heart className="h-4 w-4 mr-3 fill-pink-300 text-pink-300" />
+                  ) : (
+                    <item.icon className="h-4 w-4 mr-3" />
+                  )}
                   <span>{item.label}</span>
                   {item.path === '/appointments' && <span className="text-xs ml-auto">(Soon)</span>}
                 </div>
