@@ -103,242 +103,254 @@ const MainLayout = ({ children }) => {
   }
 
   return (
-    <div className="h-screen flex">
-      {/* Medical Professional Sidebar */}
-      <div className={`medical-sidebar flex flex-col transition-all duration-300 ${
-        isSidebarCollapsed ? 'w-16' : 'w-80'
-      }`}>
-        {/* Sidebar Header - Medical Branding */}
-        <div className="p-6 border-b border-gray-200 relative" style={{ background: '#fff0f6' }}>
-          {!isSidebarCollapsed && (
-            <>
+    <div className="min-h-screen flex flex-col">
+      {/* Top Navbar */}
+      <nav className="w-full bg-white shadow-sm border-b border-gray-100 flex items-center justify-between px-6 h-16 z-20">
+        <div className="flex items-center space-x-6">
+          <span className="text-xl font-bold text-gray-900 tracking-tight">Prenatal AI Clinic</span>
+          <button className="text-gray-600 hover:text-blue-600 font-medium transition-colors text-base" onClick={() => navigate('/about')}>About Us</button>
+        </div>
+        <div>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow-sm hover:bg-blue-700 transition-colors text-base">Log In</button>
+        </div>
+      </nav>
+      <div className="flex flex-1">
+        {/* Medical Professional Sidebar */}
+        <div className={`medical-sidebar flex flex-col transition-all duration-300 ${
+          isSidebarCollapsed ? 'w-16' : 'w-80'
+        }`}>
+          {/* Sidebar Header - Medical Branding */}
+          <div className="p-6 border-b border-gray-200 relative" style={{ background: '#fff0f6' }}>
+            {!isSidebarCollapsed && (
+              <>
+                <div 
+                  className="flex items-center space-x-3 mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => navigate('/', { replace: true })}
+                  title="Go to Home"
+                >
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                    <Baby className="h-5 w-5" style={{ color: '#ffc0cb' }} />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900 clinic-heading">Prenatal AI Clinic</h1>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 text-xs text-gray-500">
+                  <div className="status-online status-indicator"></div>
+                  <span>AI Assistant Available</span>
+                </div>
+              </>
+            )}
+            
+            {isSidebarCollapsed && (
               <div 
-                className="flex items-center space-x-3 mb-2 cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex justify-center cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => navigate('/', { replace: true })}
                 title="Go to Home"
               >
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
                   <Baby className="h-5 w-5" style={{ color: '#ffc0cb' }} />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 clinic-heading">Prenatal AI Clinic</h1>
-                </div>
               </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <div className="status-online status-indicator"></div>
-                <span>AI Assistant Available</span>
-              </div>
-            </>
-          )}
-          
-          {isSidebarCollapsed && (
-            <div 
-              className="flex justify-center cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => navigate('/', { replace: true })}
-              title="Go to Home"
+            )}
+            
+            {/* Toggle Button */}
+            <button
+              onClick={toggleSidebar}
+              className="absolute top-4 -right-3 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                <Baby className="h-5 w-5" style={{ color: '#ffc0cb' }} />
-              </div>
-            </div>
-          )}
-          
-          {/* Toggle Button */}
-          <button
-            onClick={toggleSidebar}
-            className="absolute top-4 -right-3 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
-            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
+              {isSidebarCollapsed ? (
+                <ChevronRight className="h-3 w-3 text-gray-600" />
+              ) : (
+                <ChevronLeft className="h-3 w-3 text-gray-600" />
+              )}
+            </button>
+          </div>
+
+          {/* New Chat Section */}
+          <div className="p-4">
             {isSidebarCollapsed ? (
-              <ChevronRight className="h-3 w-3 text-gray-600" />
+              <button 
+                className="w-full h-10 bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center justify-center transition-colors" 
+                onClick={startNewConversation} 
+                disabled={isLoading}
+                title="New Conversation"
+              >
+                <Plus className="h-4 w-4 text-white" />
+              </button>
             ) : (
-              <ChevronLeft className="h-3 w-3 text-gray-600" />
+              <button className="btn-primary w-full" onClick={startNewConversation} disabled={isLoading}>
+                <Plus className="h-4 w-4" />
+                <span>New Conversation</span>
+              </button>
             )}
-          </button>
-        </div>
+          </div>
 
-        {/* New Chat Section */}
-        <div className="p-4">
-          {isSidebarCollapsed ? (
-            <button 
-              className="w-full h-10 bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center justify-center transition-colors" 
-              onClick={startNewConversation} 
-              disabled={isLoading}
-              title="New Conversation"
-            >
-              <Plus className="h-4 w-4 text-white" />
-            </button>
-          ) : (
-            <button className="btn-primary w-full" onClick={startNewConversation} disabled={isLoading}>
-              <Plus className="h-4 w-4" />
-              <span>New Conversation</span>
-            </button>
+          {/* Navigation & Features */}
+          {!isSidebarCollapsed && (
+            <div className="px-4 pb-4">
+              <div className="space-y-1">
+                {navigationItems.map((item) => (
+                  <div 
+                    key={item.path}
+                    className={`sidebar-item ${isActiveRoute(item.path) ? 'sidebar-item-active' : ''} ${
+                      item.path === '/appointments' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    }`}
+                    onClick={item.path !== '/appointments' ? item.onClick : undefined}
+                  >
+                    {item.path === '/pregnancy-tips' ? (
+                      <Heart className="h-4 w-4 mr-3 fill-pink-300 text-pink-300" />
+                    ) : (
+                      <item.icon className="h-4 w-4 mr-3" />
+                    )}
+                    <span>{item.label}</span>
+                    {item.path === '/appointments' && <span className="text-xs ml-auto">(Soon)</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Collapsed Navigation Icons */}
+          {isSidebarCollapsed && (
+            <div className="px-2 pb-4">
+              <div className="space-y-2">
+                {navigationItems.map((item) => (
+                  <div 
+                    key={item.path}
+                    className={`flex justify-center p-2 rounded-lg transition-colors ${
+                      isActiveRoute(item.path) 
+                        ? 'bg-blue-50 border border-blue-200' 
+                        : 'hover:bg-gray-50'
+                    } ${
+                      item.path === '/appointments' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    }`}
+                    title={item.label}
+                    onClick={item.path !== '/appointments' ? item.onClick : undefined}
+                  >
+                    <item.icon className={`h-4 w-4 ${
+                      isActiveRoute(item.path) ? 'text-blue-600' : 'text-gray-400'
+                    }`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Chat History */}
+          <div className="flex-1 px-4 pb-4 overflow-y-auto">
+            <div className="mb-4">
+              {!isSidebarCollapsed && (
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">Recent Conversations ({conversations.length})</h3>
+              )}
+
+              {isLoading ? (
+                // Loading skeleton
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className={`p-3 rounded-xl bg-gray-50 animate-pulse ${
+                      isSidebarCollapsed ? 'h-8' : ''
+                    }`}>
+                      {!isSidebarCollapsed && (
+                        <>
+                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : conversations.length === 0 ? (
+                // Empty state
+                <div className={`text-center py-8 text-gray-500 ${isSidebarCollapsed ? 'py-4' : ''}`}>
+                  <MessageCircle className={`mx-auto mb-3 text-gray-300 ${
+                    isSidebarCollapsed ? 'h-6 w-6' : 'h-12 w-12'
+                  }`} />
+                  {!isSidebarCollapsed && (
+                    <>
+                      <p className="text-sm">No conversations yet</p>
+                      <p className="text-xs">Start chatting to see your history here</p>
+                    </>
+                  )}
+                </div>
+              ) : (
+                // Conversation list
+                <div className="space-y-2">
+                  {conversations.map((conversation) => (
+                    <div
+                      key={conversation.conversation_id}
+                      onClick={() => handleConversationClick(conversation.conversation_id)}
+                      className={`group rounded-xl cursor-pointer transition-all duration-200 border relative ${
+                        activeConversationId === conversation.conversation_id
+                          ? "bg-blue-50 border-blue-200 shadow-sm"
+                          : "hover:bg-gray-50 border-transparent hover:border-gray-200"
+                      } ${isSidebarCollapsed ? 'p-2 flex justify-center' : 'p-3'}`}
+                      title={isSidebarCollapsed ? conversation.title || "Untitled Conversation" : undefined}
+                    >
+                      {isSidebarCollapsed ? (
+                        // Collapsed view - just show a dot or icon
+                        <div className={`w-2 h-2 rounded-full ${
+                          activeConversationId === conversation.conversation_id ? 'bg-blue-600' : 'bg-gray-400'
+                        }`}></div>
+                      ) : (
+                        // Expanded view - full conversation details
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-800 mb-1 truncate">
+                              {conversation.title || "Untitled Conversation"}
+                            </div>
+                            <div className="text-xs text-gray-500 mb-1 line-clamp-2">
+                              {stripMarkdown(conversation.last_message_preview) || "No messages yet"}
+                            </div>
+                            <div className="flex items-center text-xs text-gray-400">
+                              <Clock className="h-3 w-3 mr-1" />
+                              <span>{formatTimeAgo(conversation.updated_at)}</span>
+                              {conversation.message_count > 0 && (
+                                <>
+                                  <span className="mx-1">•</span>
+                                  <span>{conversation.message_count} messages</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Delete button */}
+                          <button
+                            onClick={(e) => handleDeleteConversation(e, conversation.conversation_id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded-lg ml-2"
+                            title="Delete conversation"
+                          >
+                            <Trash2 className="h-3 w-3 text-gray-400 hover:text-red-500" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Medical Disclaimer Footer */}
+          {!isSidebarCollapsed && (
+            <div className="p-4 border-t border-gray-200 gradient-sidebar">
+              <div className="text-xs text-gray-500 text-center leading-relaxed medical-text">
+                <div className="font-medium text-gray-600 mb-1 medical-heading">Medical Disclaimer</div>
+                Always consult your healthcare provider for medical advice and decisions.
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Navigation & Features */}
-        {!isSidebarCollapsed && (
-          <div className="px-4 pb-4">
-            <div className="space-y-1">
-              {navigationItems.map((item) => (
-                <div 
-                  key={item.path}
-                  className={`sidebar-item ${isActiveRoute(item.path) ? 'sidebar-item-active' : ''} ${
-                    item.path === '/appointments' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                  }`}
-                  onClick={item.path !== '/appointments' ? item.onClick : undefined}
-                >
-                  {item.path === '/pregnancy-tips' ? (
-                    <Heart className="h-4 w-4 mr-3 fill-pink-300 text-pink-300" />
-                  ) : (
-                    <item.icon className="h-4 w-4 mr-3" />
-                  )}
-                  <span>{item.label}</span>
-                  {item.path === '/appointments' && <span className="text-xs ml-auto">(Soon)</span>}
-                </div>
-              ))}
-            </div>
+        {/* Main Content Area with Right Sidebar */}
+        <div className="flex-1 flex">
+          <div className="flex-1 flex flex-col gradient-medical">
+            <TopHeader />
+            {children}
           </div>
-        )}
-
-        {/* Collapsed Navigation Icons */}
-        {isSidebarCollapsed && (
-          <div className="px-2 pb-4">
-            <div className="space-y-2">
-              {navigationItems.map((item) => (
-                <div 
-                  key={item.path}
-                  className={`flex justify-center p-2 rounded-lg transition-colors ${
-                    isActiveRoute(item.path) 
-                      ? 'bg-blue-50 border border-blue-200' 
-                      : 'hover:bg-gray-50'
-                  } ${
-                    item.path === '/appointments' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                  }`}
-                  title={item.label}
-                  onClick={item.path !== '/appointments' ? item.onClick : undefined}
-                >
-                  <item.icon className={`h-4 w-4 ${
-                    isActiveRoute(item.path) ? 'text-blue-600' : 'text-gray-400'
-                  }`} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Chat History */}
-        <div className="flex-1 px-4 pb-4 overflow-y-auto">
-          <div className="mb-4">
-            {!isSidebarCollapsed && (
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Recent Conversations ({conversations.length})</h3>
-            )}
-
-            {isLoading ? (
-              // Loading skeleton
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={`p-3 rounded-xl bg-gray-50 animate-pulse ${
-                    isSidebarCollapsed ? 'h-8' : ''
-                  }`}>
-                    {!isSidebarCollapsed && (
-                      <>
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : conversations.length === 0 ? (
-              // Empty state
-              <div className={`text-center py-8 text-gray-500 ${isSidebarCollapsed ? 'py-4' : ''}`}>
-                <MessageCircle className={`mx-auto mb-3 text-gray-300 ${
-                  isSidebarCollapsed ? 'h-6 w-6' : 'h-12 w-12'
-                }`} />
-                {!isSidebarCollapsed && (
-                  <>
-                    <p className="text-sm">No conversations yet</p>
-                    <p className="text-xs">Start chatting to see your history here</p>
-                  </>
-                )}
-              </div>
-            ) : (
-              // Conversation list
-              <div className="space-y-2">
-                {conversations.map((conversation) => (
-                  <div
-                    key={conversation.conversation_id}
-                    onClick={() => handleConversationClick(conversation.conversation_id)}
-                    className={`group rounded-xl cursor-pointer transition-all duration-200 border relative ${
-                      activeConversationId === conversation.conversation_id
-                        ? "bg-blue-50 border-blue-200 shadow-sm"
-                        : "hover:bg-gray-50 border-transparent hover:border-gray-200"
-                    } ${isSidebarCollapsed ? 'p-2 flex justify-center' : 'p-3'}`}
-                    title={isSidebarCollapsed ? conversation.title || "Untitled Conversation" : undefined}
-                  >
-                    {isSidebarCollapsed ? (
-                      // Collapsed view - just show a dot or icon
-                      <div className={`w-2 h-2 rounded-full ${
-                        activeConversationId === conversation.conversation_id ? 'bg-blue-600' : 'bg-gray-400'
-                      }`}></div>
-                    ) : (
-                      // Expanded view - full conversation details
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-gray-800 mb-1 truncate">
-                            {conversation.title || "Untitled Conversation"}
-                          </div>
-                          <div className="text-xs text-gray-500 mb-1 line-clamp-2">
-                            {stripMarkdown(conversation.last_message_preview) || "No messages yet"}
-                          </div>
-                          <div className="flex items-center text-xs text-gray-400">
-                            <Clock className="h-3 w-3 mr-1" />
-                            <span>{formatTimeAgo(conversation.updated_at)}</span>
-                            {conversation.message_count > 0 && (
-                              <>
-                                <span className="mx-1">•</span>
-                                <span>{conversation.message_count} messages</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Delete button */}
-                        <button
-                          onClick={(e) => handleDeleteConversation(e, conversation.conversation_id)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded-lg ml-2"
-                          title="Delete conversation"
-                        >
-                          <Trash2 className="h-3 w-3 text-gray-400 hover:text-red-500" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <PrenatalRoadmap />
         </div>
-
-        {/* Medical Disclaimer Footer */}
-        {!isSidebarCollapsed && (
-          <div className="p-4 border-t border-gray-200 gradient-sidebar">
-            <div className="text-xs text-gray-500 text-center leading-relaxed medical-text">
-              <div className="font-medium text-gray-600 mb-1 medical-heading">Medical Disclaimer</div>
-              Always consult your healthcare provider for medical advice and decisions.
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Main Content Area with Right Sidebar */}
-      <div className="flex-1 flex">
-        <div className="flex-1 flex flex-col gradient-medical">
-          <TopHeader />
-          {children}
-        </div>
-        <PrenatalRoadmap />
       </div>
     </div>
   )
